@@ -1,0 +1,13 @@
+name: FindItems
+version: ${project.version}
+main: de.marvinleiers.finditems.FindItems
+api-version: 1.16
+authors: [ Marvin_Leiers ]
+website: https://www.marvinleiers.de
+
+commands:
+  items:
+
+depend:
+  - Vault
+  - MPluginAPI

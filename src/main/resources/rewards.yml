@@ -1,0 +1,39 @@
+#########################################################
+#                                                       #
+#               Plugin by Marvin Leiers                 #
+#             https://www.marvinleiers.de               #
+#                                                       #
+#########################################################
+
+# In dieser Datei kannst du die Belohnungen für 5er-Folgen (small) und 40er-Folgen (big) von Items einstellen.
+small-reward:
+  money: 250 # Kannst du natürlich ändern.
+
+big-rewards:
+  item: DIRT # Kannst du natürlich ändern.
+
+# Stufen-Belohung
+level-1-reward:
+  money: 300
+  item: DIRT
+
+level-2-reward:
+  money: 400
+  item: DIRT
+
+level-3-reward:
+  money: 500
+  item: DIAMOND
+
+level-4-reward:
+  money: 600
+  item: DIAMOND_ORE
+
+level-5-reward:
+  money: 700
+  item: DIAMOND_BLOCK
+
+# Belohnung, wenn *alle* Items gefunden worden sind (Stufe 5 abgeschlossen)
+super-big-reward:
+  money: 5000
+  item: GRASS_BLOCK

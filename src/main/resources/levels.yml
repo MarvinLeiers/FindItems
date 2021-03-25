@@ -1,0 +1,16 @@
+#########################################################
+#                                                       #
+#               Plugin by Marvin Leiers                 #
+#             https://www.marvinleiers.de               #
+#                                                       #
+#########################################################
+
+# Trage hier die Items für die verschiedenen Level ein (eine Liste der verfügbaren Items findest du in "items.yml":
+levels:
+  1:
+    - STONE    # <- Zum Beispiel
+  2:
+  3:
+    - DIAMOND_ORE   # <- Noch ein Beipiel
+  4:
+  5:

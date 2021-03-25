@@ -1,0 +1,45 @@
+#########################################################
+#                                                       #
+#               Plugin by Marvin Leiers                 #
+#             https://www.marvinleiers.de               #
+#                                                       #
+#########################################################
+
+
+############################
+### # General Settings # ###
+############################
+
+# Zeige Pluginverhalten in der Konsole (logging)
+enable-logging: true
+
+reihen:
+  # Beispiel: Spieler erhält Belohnung, wenn erst diamant, dann stein und danach ein minecart gesammelt wird
+  - DIAMOND, STONE, MINECART
+  - STONE, GRASS_BLOCK, DIAMOND_ORE
+
+############################
+###### # Messages # ########
+############################
+
+# Nachricht, wenn ein Spieler ein Item gefunden hat.
+message-item-found: "&7Du hast &b<v> &7gefunden!"
+message-received-small-reward: "&7Du hast &b<v>€ &7erhalten"
+message-level-up: "&7Du hast Level &b<v> &7erreicht"
+
+
+##########################
+### # MySQL Settings # ###
+##########################
+
+# Hostname der MySQL-Datenbank
+mysql-host: "localhost"
+
+# Name der Datenbank
+mysql-database: "mplugin_finditems"
+
+# Benutzer der MySQL-Datenbank
+mysql-user: "root"
+
+# Password des Benutzers
+mysql-password: ""
