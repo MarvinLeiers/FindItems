@@ -5,15 +5,7 @@
 #                                                       #
 #########################################################
 
-# Trage hier die Items für die verschiedenen Level ein (eine Liste der verfügbaren Items findest du in "items.yml":
-levels:
-  1:
-    - STONE    # <- Zum Beispiel
-    - DIAMOND
-    - DIAMOND_ORE
-    - DIRT
-  2:
-  3:
-    - DIAMOND_AXE   # <- Noch ein Beipiel
-  4:
-  5:
+# Hier werden die Itemnamen übersetzt... Viel Spaß!
+
+DIRT: "Erde"
+DIAMOND_BLOCK: "Diamant Block"

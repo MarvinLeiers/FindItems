@@ -1,6 +1,7 @@
 package de.marvinleiers.finditems.utils;
 
 import de.marvinleiers.finditems.FindItems;
+import de.marvinleiers.finditems.commands.Items;
 import de.marvinleiers.mpluginapi.mpluginapi.utils.CustomConfig;
 import de.marvinleiers.mpluginapi.mpluginapi.utils.ItemFactory;
 import de.marvinleiers.mpluginapi.mpluginapi.utils.ItemUtils;
@@ -25,7 +26,7 @@ public class ItemManager
     private static final HashMap<Player, LastItems> lastItems = new HashMap<>();
     private static final HashMap<Player, BossBar> bossBars = new HashMap<>();
     private static final HashMap<Integer, List<String>> itemsPerLevel = new HashMap<>();
-    private static final List<List<Material>> reihen = new ArrayList<>();
+    private static final HashMap<List<Material>, Reward> reihen = new HashMap<>();
     private static MySQL mySQL;
     private static ItemManager instance;
     private Set<Material> allowedItems;
@@ -44,17 +45,18 @@ public class ItemManager
         }
 
         CustomConfig config = new CustomConfig(FindItems.getInstance().getDataFolder().getPath() + "/config.yml");
-        List<String> reihenList = config.getConfig().getStringList("reihen");
+        Set<Map.Entry<String, Object>> reihenList = config.getSection("reihen").getValues(false).entrySet();
 
-        for (String str : reihenList)
+        for (Map.Entry<String, Object> entry : reihenList)
         {
-            String[] mats = str.split(", ");
+            String[] mats = config.getConfig().getStringList("reihen." + entry.getKey() + ".items").get(0).split(", ");
             List<Material> materialList = new ArrayList<>();
 
             for (String material : mats)
                 materialList.add(Material.valueOf(material.toUpperCase().trim()));
 
-            reihen.add(materialList);
+            reihen.put(materialList, new Reward(Material.valueOf(config.getString("reihen." + entry.getKey() + ".reward.item")),
+                    config.getDouble("reihen." + entry.getKey() + ".reward.money")));
 
             System.out.println("Added list with " + materialList.size() + " items");
         }
@@ -178,13 +180,14 @@ public class ItemManager
         // Wenn der Spieler dieses Item bereits gefunden hat, wird das Item nicht markiert.
         if (!has(player, material) && isValidItemForPlayer(player, itemStack))
         {
+            if (!mySQL.exists(player, "player_progress"))
+                mySQL.update("INSERT INTO player_progress (uuid, level_one_progress, level_two_progress, level_three_progress," +
+                        "level_four_progress, level_five_progress, level) VALUES ('" + player.getUniqueId().toString() + "', 0, 0, 0, 0, 0, 1);");
+
             if (!lastItems.containsKey(player))
             {
                 lastItems.put(player, new LastItems(player));
             }
-
-            LastItems lastItemsFromPlayer = lastItems.get(player);
-            lastItemsFromPlayer.addMaterial(material);
 
             new ItemFactory(FindItems.getInstance(), itemStack).addPersistentDataEntry("mplugin.used", "true");
 
@@ -198,6 +201,9 @@ public class ItemManager
 
             foundMaterials.add(material.name());
             customConfig.set("items", foundMaterials);
+
+            LastItems lastItemsFromPlayer = lastItems.get(player);
+            lastItemsFromPlayer.addMaterial(material);
 
             FindItems.getInstance().log(player.getName() + " hat " + material.name() + " gefunden.");
 
@@ -239,8 +245,10 @@ public class ItemManager
             }, 20 * 5);
 
             Bukkit.getScheduler().runTaskLater(FindItems.getInstance(),
-                    () -> player.sendMessage(FindItems.getInstance().getMessages().get("message-item-found",
-                            ItemUtils.beautifyName(material.name()))), 1);
+                    () -> {
+                        player.sendMessage(FindItems.getInstance().getMessages().get("message-item-found", Translations.get(material)));
+                        Items.update(player);
+                    }, 1);
 
             mySQL.update("UPDATE player_progress SET " + columnName + " = " + newProgress + " WHERE uuid = '" + player.getUniqueId().toString() + "';");
         }
@@ -299,9 +307,11 @@ public class ItemManager
      */
     public void loadItems()
     {
-        CustomConfig config = new CustomConfig(FindItems.getInstance().getDataFolder().getPath() + "/items.yml");
+        CustomConfig itemsConfig = new CustomConfig(FindItems.getInstance().getDataFolder().getPath() + "/items.yml");
 
-        for (String str : config.getConfig().getStringList("items"))
+        allowedItems.clear();
+
+        for (String str : itemsConfig.getConfig().getStringList("items"))
         {
             Material material;
 
@@ -317,6 +327,33 @@ public class ItemManager
 
             allowedItems.add(material);
         }
+
+        CustomConfig levelsConfig = new CustomConfig(FindItems.getInstance().getDataFolder().getPath() + "/levels.yml");
+
+        itemsPerLevel.clear();
+
+        for (int i = 1; i <= 5; i++)
+        {
+            List<String> items = levelsConfig.getConfig().getStringList("levels." + i);
+            itemsPerLevel.put(i, items);
+        }
+
+        CustomConfig config = new CustomConfig(FindItems.getInstance().getDataFolder().getPath() + "/config.yml");
+        Set<Map.Entry<String, Object>> reihenList = config.getSection("reihen").getValues(false).entrySet();
+
+        reihen.clear();
+
+        for (Map.Entry<String, Object> entry : reihenList)
+        {
+            String[] mats = config.getConfig().getStringList("reihen." + entry.getKey() + ".items").get(0).split(", ");
+            List<Material> materialList = new ArrayList<>();
+
+            for (String material : mats)
+                materialList.add(Material.valueOf(material.toUpperCase().trim()));
+
+            reihen.put(materialList, new Reward(Material.valueOf(config.getString("reihen." + entry.getKey() + ".reward.item")),
+                    config.getDouble("reihen." + entry.getKey() + ".reward.money")));
+        }
     }
 
     public HashMap<Integer, List<String>> getItemsPerLevel()
@@ -329,7 +366,7 @@ public class ItemManager
         return allowedItems;
     }
 
-    public static List<List<Material>> getReihen()
+    public static HashMap<List<Material>, Reward> getReihen()
     {
         return reihen;
     }

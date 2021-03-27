@@ -13,17 +13,31 @@
 # Zeige Pluginverhalten in der Konsole (logging)
 enable-logging: true
 
+# Anzahl er Hologramme, die pro Reihe angezeigt werden sollen.
+holograms-per-row: 30
+
+# Itemfolgen
 reihen:
   # Beispiel: Spieler erhält Belohnung, wenn erst diamant, dann stein und danach ein minecart gesammelt wird
-  - DIAMOND, STONE, MINECART
-  - STONE, GRASS_BLOCK, DIAMOND_ORE
+  1:
+    reward:
+      money: 100
+      item: STONE
+    items:
+      - DIAMOND, STONE, DIAMOND_ORE
+  2:
+    reward:
+      money: 100
+      item: DIRT
+    items:
+      - STONE, GRASS_BLOCK, DIAMOND_AXE
 
 ############################
 ###### # Messages # ########
 ############################
 
-# Nachricht, wenn ein Spieler ein Item gefunden hat.
 message-item-found: "&7Du hast &b<v> &7gefunden!"
+message-row-complete: "&7Du hast eine Reihe von Items vollständig entdeckt!"
 message-received-small-reward: "&7Du hast &b<v>€ &7erhalten"
 message-level-up: "&7Du hast Level &b<v> &7erreicht"
 

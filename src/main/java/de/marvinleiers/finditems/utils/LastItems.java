@@ -4,70 +4,82 @@ import de.marvinleiers.finditems.FindItems;
 import de.marvinleiers.mpluginapi.mpluginapi.utils.CustomConfig;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
 public class LastItems
 {
-    private static final CustomConfig rewards = new CustomConfig(FindItems.getInstance().getDataFolder().getPath() + "/rewards.yml");
-    private static final List<List<Material>> reihen = ItemManager.getReihen();
+    private static final HashMap<List<Material>, Reward> reihen = ItemManager.getReihen();
+    private static final ItemManager itemManager = ItemManager.getInstance();
 
-    private HashMap<List<Material>, Integer> currentReihen;
+    private final List<String> currentReihen;
     private final Player player;
 
     public LastItems(Player player)
     {
         this.player = player;
-        this.currentReihen = new HashMap<>();
+        this.currentReihen = new ArrayList<>();
     }
 
     public void addMaterial(Material material)
     {
-        for (List<Material> reihe : reihen)
+        for (Map.Entry<List<Material>, Reward> entry : reihen.entrySet())
         {
-            if (reihe.isEmpty())
+            if (hasRow(player, entry.getKey()))
             {
-                continue;
-            }
+                Reward reward = entry.getValue();
+                Material rewardItem = reward.getMaterial();
+                FindItems.getEconomy().depositPlayer(player, reward.getMoney());
 
-            if (reihe.get(0).name().equals(material.name()))
-            {
-                currentReihen.put(reihe, 0);
-            }
-        }
-
-        for (Map.Entry<List<Material>, Integer> entry : currentReihen.entrySet())
-        {
-            int currentItemInRow = entry.getValue();
-            List<Material> currentReihe = entry.getKey();
-
-            if (currentReihe.isEmpty())
-                continue;
-
-            if (!currentReihe.get(currentItemInRow).name().equals(material.name()))
-            {
-                currentReihe.clear();
-            }
-            else
-            {
-                if (currentItemInRow + 1 >= currentReihe.size())
+                if (rewardItem != null)
                 {
-                    if (currentItemInRow + 1 == 5)
+                    if (player.getInventory().firstEmpty() == -1)
                     {
-                        double amount = rewards.getDouble("small-reward.money");
-                        FindItems.getEconomy().depositPlayer(player, amount);
-
-                        player.sendMessage(FindItems.getInstance().getMessages().get("message-received-small-reward", amount + ""));
+                        player.getWorld().dropItem(player.getLocation(), new ItemStack(rewardItem));
                     }
-                    else if (currentItemInRow + 1== 40)
+                    else
                     {
-                        System.out.println("Große belohnung!");
+                        player.getInventory().addItem(new ItemStack(rewardItem));
                     }
                 }
 
-                currentReihen.put(currentReihe, ++currentItemInRow);
+                player.sendMessage(FindItems.getInstance().getMessages().get("message-received-small-reward", reward.getMoney() + ""));
+                player.sendMessage(FindItems.getInstance().getMessages().get("message-row-complete"));
+
+                String str = "";
+
+                for (Material material1 : entry.getKey())
+                {
+                    str += material1.name();
+                }
+
+                currentReihen.add(str);
             }
         }
+    }
+
+    private boolean hasRow(Player player, List<Material> list)
+    {
+        String str = "";
+
+        for (Material material1 : list)
+        {
+            str += material1.name();
+        }
+
+        if (currentReihen.contains(str))
+        {
+            return false;
+        }
+
+        for (Material material : list)
+        {
+            if (!itemManager.has(player, material))
+                return false;
+        }
+
+        return true;
     }
 
     public Player getPlayer()

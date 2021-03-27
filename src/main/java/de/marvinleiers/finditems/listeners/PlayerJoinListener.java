@@ -22,7 +22,6 @@ public class PlayerJoinListener implements Listener
         {
             mySQL.update("INSERT INTO player_progress (uuid, level_one_progress, level_two_progress, level_three_progress," +
                     "level_four_progress, level_five_progress, level) VALUES ('" + player.getUniqueId().toString() + "', 0, 0, 0, 0, 0, 1);");
-
         }
 
         System.out.println("progress " + itemManager.getPlayerLevelProgress(player));
